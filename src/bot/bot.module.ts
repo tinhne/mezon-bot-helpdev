@@ -19,6 +19,7 @@ import { BugCommand } from './commands/bug/bug.command';
 import { SolutionCommand } from './commands/solution/solution.command';
 import { SearchCommand } from './commands/search/search.command';
 import { HelpCommand } from './commands/help/help.command';
+import { PingCommand } from './commands/ping/ping.command';
 
 // Các listener
 import { ListenerChannelMessage } from './listeners/onChannelMessage.listener';
@@ -45,6 +46,7 @@ import { CommandBase } from './base/command.handle';
     SolutionCommand,
     SearchCommand,
     HelpCommand,
+    PingCommand,
 
     // Listeners
     ListenerChannelMessage,

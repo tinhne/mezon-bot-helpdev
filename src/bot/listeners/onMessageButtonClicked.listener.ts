@@ -5,7 +5,8 @@ import { EMarkdownType } from 'mezon-sdk';
 // Define the expected event payload type if not exported by mezon-sdk
 interface MessageButtonClicked {
   custom_id: string;
-  clan_id: string;
+  clan_id?: string;     // Giữ lại để tương thích với mã cũ
+  server_id: string;    // Thêm trường này
   channel_id: string;
   message_id: string;
   user_id: string;
@@ -38,29 +39,47 @@ export class ListenerMessageButtonClicked {
     private readonly clientService: MezonClientService,
   ) {}
 
-  @OnEvent('message.button.clicked')
-  async handleButtonClick(event: MessageButtonClicked) {
-    try {
-      const customId = event.custom_id;
+@OnEvent('message.button.clicked')
+async handleButtonClick(event: MessageButtonClicked) {
+  try {
+    const customId = event.custom_id;
 
-      // Parse custom_id để biết loại action và ID
-      const parts = customId.split(':');
-      const action = parts[0];
-      const type = parts[1];
-      const id = parts[2];
+    // Parse custom_id để biết loại action và ID
+    const parts = customId.split(':');
+    const action = parts[0];
+    const type = parts[1];
+    const id = parts[2];
 
-      // Lấy client và channel để response
-      const client = this.clientService.getClient();
-      const clan = client.clans.get(event.clan_id);
-      const channel = await clan?.channels.fetch(event.channel_id);
-      const message = await channel?.messages.fetch(event.message_id);
-
-      if (!message) {
-        this.logger.warn(
-          `Message not found for button click: ${event.message_id}`,
-        );
-        return;
+    // Lấy client và channel để response
+    const client = this.clientService.getClient();
+    
+    // Kiểm tra server/channel an toàn
+    let channel;
+    let message;
+    
+    if (client?.servers) {
+      const server = client.servers.get(event.server_id);
+      if (server) {
+        channel = await server.channels.fetch(event.channel_id);
       }
+    } else if ((client as any)?.clans) {
+      const clan = (client as any).clans.get(event.clan_id || event.server_id);
+      if (clan) {
+        channel = await clan.channels.fetch(event.channel_id);
+      }
+    }
+    
+    if (!channel) {
+      this.logger.warn(`Channel not found for button click: ${event.channel_id}`);
+      return;
+    }
+    
+    message = await channel.messages.fetch(event.message_id);
+
+    if (!message) {
+      this.logger.warn(`Message not found for button click: ${event.message_id}`);
+      return;
+    }
 
       // Xử lý các action button khác nhau
       switch (action) {

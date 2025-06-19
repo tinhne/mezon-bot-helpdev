@@ -1,8 +1,27 @@
 export function extractMessage(message: string) {
-  const args = message.replace('\n', ' ').slice('*'.length).trim().split(/ +/);
+  // Xử lý cả hai loại tiền tố * và /
+  let prefix = '';
+  let cleanMessage = message;
+  
+  // Kiểm tra và loại bỏ tiền tố
+  if (message.startsWith('*')) {
+    prefix = '*';
+    cleanMessage = message.slice('*'.length);
+  } else if (message.startsWith('/')) {
+    prefix = '/';
+    cleanMessage = message.slice('/'.length);
+  } else {
+    return [false, []]; // Không có tiền tố hợp lệ
+  }
+  
+  // Xử lý các đối số
+  const args = cleanMessage.replace('\n', ' ').trim().split(/ +/);
+  
   if (args.length > 0) {
     return [args.shift()?.toLowerCase(), args];
-  } else return [false, []];
+  } else {
+    return [false, []];
+  }
 }
 
 export async function sleep(ms: number) {
