@@ -5,10 +5,13 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class ListenerChannelMessage {
-  constructor(private commandBase: CommandBase) {}
+  constructor(private commandBase: CommandBase) {
+      console.log('ListenerChannelMessage initialized');
+  }
 
   @OnEvent(Events.ChannelMessage)
   async handleCommand(message: ChannelMessage) {
+    console.log('Received message:', message.content?.t); // Thêm dòng này
     if (message.code) return; // Do not support case edit message
     try {
       const content = message.content.t;
