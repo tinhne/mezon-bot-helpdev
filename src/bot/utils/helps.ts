@@ -1,7 +1,14 @@
 export function extractMessage(message: string) {
-  // Xử lý cả hai loại tiền tố * và /
+  // Xử lý cả ba loại tiền tố *, / và \, cũng như trường hợp không có tiền tố
   let prefix = '';
   let cleanMessage = message;
+  let commandName = '';
+  let args: string[] = [];
+  
+  // Kiểm tra nếu là lệnh active mà không có tiền tố
+  if (message === 'active') {
+    return ['active', []];
+  }
   
   // Kiểm tra và loại bỏ tiền tố
   if (message.startsWith('*')) {
@@ -10,15 +17,26 @@ export function extractMessage(message: string) {
   } else if (message.startsWith('/')) {
     prefix = '/';
     cleanMessage = message.slice('/'.length);
+  } else if (message.startsWith('\\')) {
+    prefix = '\\';
+    cleanMessage = message.slice('\\'.length);
+  } else if (message === 'activate' || message === 'deactivate' || message === 'botstatus' || 
+             message.startsWith('activate ') || message.startsWith('deactivate ') || 
+             message.startsWith('botstatus ')) {
+    // Đặc biệt xử lý các lệnh không có tiền tố nhưng cần được nhận dạng
+    prefix = '';
+    cleanMessage = message;
   } else {
-    return [false, []]; // Không có tiền tố hợp lệ
+    return [false, []]; // Không có tiền tố hợp lệ và không phải lệnh đặc biệt
   }
   
   // Xử lý các đối số
-  const args = cleanMessage.replace('\n', ' ').trim().split(/ +/);
+  const argParts = cleanMessage.replace('\n', ' ').trim().split(/ +/);
   
-  if (args.length > 0) {
-    return [args.shift()?.toLowerCase(), args];
+  if (argParts.length > 0) {
+    commandName = argParts.shift()?.toLowerCase() || '';
+    args = argParts;
+    return [commandName, args];
   } else {
     return [false, []];
   }

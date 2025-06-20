@@ -22,6 +22,10 @@ import { SearchCommand } from './commands/search/search.command';
 import { HelpCommand } from './commands/help/help.command';
 import { PingCommand } from './commands/ping/ping.command';
 import { BotCommand } from './commands/bot/bot.command';
+// Thêm import cho các lệnh mới
+import { ActiveCommand } from './commands/active/active.command';
+import { DeactivateCommand } from './commands/deactivate/deactivate.command';
+import { BotstatusCommand } from './commands/botstatus/botstatus.command';
 
 // Listeners
 import { ListenerChannelMessage } from './listeners/onChannelMessage.listener';
@@ -51,6 +55,10 @@ import { CommandBase } from './base/command.handle';
     HelpCommand,
     PingCommand,
     BotCommand,
+    // Thêm các lệnh mới
+    ActiveCommand,
+    DeactivateCommand,
+    BotstatusCommand,
 
     // Listeners
     ListenerChannelMessage,
