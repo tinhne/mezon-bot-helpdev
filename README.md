@@ -96,3 +96,37 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+
+command:
+1. Lệnh trợ giúp (help)
+*help
+2. Quản lý lệnh (command)
+*command save --title="git-stash" --command="git stash apply" --desc="Áp dụng stash gần nhất" --category="git"
+*command list --category="git"
+*command detail --id=1
+*command find --query="git stash"
+*command update --id=1 --title="git-stash-new" --desc="Mô tả mới"
+*command delete --id=1
+*command restore --id=1
+3. Quản lý bug
+*bug create --title="JWT token không refresh" --desc="Token mới không được tạo khi token cũ hết hạn" --severity="high" --steps="1. Đăng nhập\n2. Đợi token hết hạn\n3. Thực hiện API call" --environment={"os": "Ubuntu 22.04", "browser": "Chrome 118"}
+*bug list --status="open"
+*bug detail --id=1
+*bug update --id=1 --status="in_progress" --severity="medium" --title="JWT lỗi" --desc="Mô tả mới"
+4. Quản lý giải pháp (solution)
+*solution create --bug-id=1 --title="Sửa lỗi refresh token" --desc="Token refresh không hoạt động do thiếu kiểm tra" --code="const checkToken = async (req, res, next) => {...}"
+*solution list --bug-id=1
+*solution detail --id=1
+*solution update --id=1 --title="Tiêu đề mới" --desc="Mô tả mới" --code="Code mới"
+5. Tìm kiếm (search)
+*search token
+*search bugs refresh
+*search solutions authentication
+6. Kiểm tra trạng thái bot
+*bot status
+*bot deactivate
+*bot activate
+*bot reset
+7. Ping bot
+*ping# Devhelp-mezon
