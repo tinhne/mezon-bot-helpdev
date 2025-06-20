@@ -5,6 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BotModule } from './bot/bot.module';
 import { MezonModule } from './mezon/mezon.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { HealthController } from './health.controller';
 
 @Module({
   imports: [
@@ -31,16 +34,14 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         database: configService.get('POSTGRES_DB'),
         autoLoadEntities: true,
         synchronize: true,
-        // migrations: [path.join(__dirname, 'src', 'migration', '*.js')],
-        // cli: {
-        //   migrationsDir: __dirname + '/migration',
-        // },
       }),
     }),
     MezonModule.forRootAsync({
       imports: [ConfigModule],
     }),
     BotModule,
-  ]
+  ],
+  controllers: [AppController, HealthController],
+  providers: [AppService],
 })
 export class AppModule {}

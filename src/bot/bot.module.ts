@@ -2,26 +2,28 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MezonModule } from 'src/mezon/mezon.module';
 
-// Các dịch vụ
+// Services
 import { CommandService } from './services/command.service';
 import { BugService } from './services/bug.service';
 import { SolutionService } from './services/solution.service';
 import { SearchService } from './services/search.service';
+import { BotStateService } from './services/bot-state.service';
 
-// Các thực thể
+// Entities
 import { Command } from './models/command.entity';
 import { Bug } from './models/bug.entity';
 import { Solution } from './models/solution.entity';
 
-// Các lệnh
+// Commands
 import { CommandBotCommand } from './commands/command/command.command';
 import { BugCommand } from './commands/bug/bug.command';
 import { SolutionCommand } from './commands/solution/solution.command';
 import { SearchCommand } from './commands/search/search.command';
 import { HelpCommand } from './commands/help/help.command';
 import { PingCommand } from './commands/ping/ping.command';
+import { BotCommand } from './commands/bot/bot.command';
 
-// Các listener
+// Listeners
 import { ListenerChannelMessage } from './listeners/onChannelMessage.listener';
 import { ListenerMessageButtonClicked } from './listeners/onMessageButtonClicked.listener';
 import { BotGateway } from './events/bot.gateways';
@@ -33,6 +35,7 @@ import { CommandBase } from './base/command.handle';
     // Core
     BotGateway,
     CommandBase,
+    BotStateService,
 
     // Services
     CommandService,
@@ -47,10 +50,12 @@ import { CommandBase } from './base/command.handle';
     SearchCommand,
     HelpCommand,
     PingCommand,
+    BotCommand,
 
     // Listeners
     ListenerChannelMessage,
     ListenerMessageButtonClicked,
   ],
+  exports: [BotGateway, BotStateService],
 })
 export class BotModule {}

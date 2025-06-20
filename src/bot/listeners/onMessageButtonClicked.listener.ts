@@ -1,31 +1,27 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { EMarkdownType } from 'mezon-sdk';
-
-// Define the expected event payload type if not exported by mezon-sdk
-interface MessageButtonClicked {
-  custom_id: string;
-  clan_id?: string;     // Giữ lại để tương thích với mã cũ
-  server_id: string;    // Thêm trường này
-  channel_id: string;
-  message_id: string;
-  user_id: string;
-}
-
+import { Events, EMarkdownType } from 'mezon-sdk';
 import { CommandService } from '../services/command.service';
 import { BugService } from '../services/bug.service';
 import { SolutionService } from '../services/solution.service';
 import { SearchService } from '../services/search.service';
 import { MezonClientService } from 'src/mezon/services/mezon-client.service';
+import { ButtonStyle, MessageComponentType, ButtonAction } from '../constants/types';
+import { ActionRowComponent, ButtonComponent } from '../constants/interfaces';
 import { getRandomColor } from '../utils/helps';
 import { createButton, createActionRow } from '../utils/component-helpers';
 import { createPreMarkdown } from '../utils/reply-helpers';
-import {
-  ButtonAction,
-  ButtonStyle,
-  MessageComponentType,
-} from '../constants/types';
-import { ActionRowComponent, ButtonComponent } from '../constants/interfaces';
+import { BotStateService } from '../services/bot-state.service';
+
+// Define the expected event payload type if not exported by mezon-sdk
+interface MessageButtonClicked {
+  custom_id: string;
+  clan_id?: string;     // Keep for backward compatibility
+  server_id: string;    // Add this field
+  channel_id: string;
+  message_id: string;
+  user_id: string;
+}
 
 @Injectable()
 export class ListenerMessageButtonClicked {
@@ -37,51 +33,59 @@ export class ListenerMessageButtonClicked {
     private readonly solutionService: SolutionService,
     private readonly searchService: SearchService,
     private readonly clientService: MezonClientService,
+    private readonly botStateService: BotStateService
   ) {}
 
-@OnEvent('message.button.clicked')
-async handleButtonClick(event: MessageButtonClicked) {
-  try {
-    const customId = event.custom_id;
-
-    // Parse custom_id để biết loại action và ID
-    const parts = customId.split(':');
-    const action = parts[0];
-    const type = parts[1];
-    const id = parts[2];
-
-    // Lấy client và channel để response
-    const client = this.clientService.getClient();
-    
-    // Kiểm tra server/channel an toàn
-    let channel;
-    let message;
-    
-    if (client?.servers) {
-      const server = client.servers.get(event.server_id);
-      if (server) {
-        channel = await server.channels.fetch(event.channel_id);
-      }
-    } else if ((client as any)?.clans) {
-      const clan = (client as any).clans.get(event.clan_id || event.server_id);
-      if (clan) {
-        channel = await clan.channels.fetch(event.channel_id);
-      }
-    }
-    
-    if (!channel) {
-      this.logger.warn(`Channel not found for button click: ${event.channel_id}`);
+  @OnEvent(Events.MessageButtonClicked) // FIX: Removed the extra @ symbol
+  async handleButtonClick(event: MessageButtonClicked) {
+    // Skip if bot is inactive
+    if (!this.botStateService.isActive()) {
+      this.logger.debug(`Button click ignored - bot is inactive: ${event.custom_id}`);
       return;
     }
     
-    message = await channel.messages.fetch(event.message_id);
+    try {
+      const customId = event.custom_id;
+      this.logger.debug(`Processing button click: ${customId}`);
 
-    if (!message) {
-      this.logger.warn(`Message not found for button click: ${event.message_id}`);
-      return;
-    }
+      // Parse custom_id to get action type and ID
+      const parts = customId.split(':');
+      const action = parts[0];
+      const type = parts[1];
+      const id = parts[2];
 
-      // Xử lý các action button khác nhau
+      // Get client and channel to respond
+      const client = this.clientService.getClient();
+      
+      // Check server/channel safely
+      let channel;
+      let message;
+      
+      if (client?.servers) {
+        const server = client.servers.get(event.server_id);
+        if (server) {
+          channel = await server.channels.fetch(event.channel_id);
+        }
+      } else if ((client as any)?.clans) {
+        const clan = (client as any).clans.get(event.clan_id || event.server_id);
+        if (clan) {
+          channel = await clan.channels.fetch(event.channel_id);
+        }
+      }
+      
+      if (!channel) {
+        this.logger.warn(`Channel not found for button click: ${event.channel_id}`);
+        return;
+      }
+      
+      message = await channel.messages.fetch(event.message_id);
+
+      if (!message) {
+        this.logger.warn(`Message not found for button click: ${event.message_id}`);
+        return;
+      }
+
+      // Process different button actions
       switch (action) {
         case ButtonAction.VIEW:
           await this.handleViewDetail(type, id, message);
@@ -107,7 +111,7 @@ async handleButtonClick(event: MessageButtonClicked) {
           await this.handleSearch(type, id, message);
           break;
 
-        case ButtonAction.HELP:
+        case 'help':
           await this.handleHelp(type, message);
           break;
 
@@ -115,10 +119,7 @@ async handleButtonClick(event: MessageButtonClicked) {
           this.logger.warn(`Unknown button action: ${action}`);
       }
     } catch (error) {
-      this.logger.error(
-        `Error handling button click: ${error.message}`,
-        error.stack,
-      );
+      this.logger.error(`Error handling button click: ${error.message}`, error.stack);
     }
   }
 
