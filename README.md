@@ -1,132 +1,74 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# mezon-bot-helpdev
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Working copy in which the DevHelp bot for [Mezon](https://mezon.ai) was first built. It contains the full commit history of the `mezonai/utility-mezon-bot` template, followed by the June 2025 commits that replaced the template's features with developer-helper commands.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+**Status:** snapshot, no longer developed. The maintained version is [`tinhne/Devhelp-mezon`](https://github.com/tinhne/Devhelp-mezon).
 
-## Description
+## Origin of the code
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Most of the history in this repository was written by other people. It was imported from [`mezonai/utility-mezon-bot`](https://github.com/mezonai/utility-mezon-bot), a NestJS Mezon bot whose commit history (pull requests #1 to #52) is preserved here unchanged.
 
-## Project setup
+| Period | Authors | What happened |
+| --- | --- | --- |
+| 2025-04-23 → 2025-06-13 | michael.mai, thai.phamquoc ([@Cut666](https://github.com/Cut666)), man2807 ([@man2807](https://github.com/man2807)), van-datncc ([@van-datncc](https://github.com/van-datncc)) | Upstream template: command framework plus casino slots, sic bo, lixi, polls, P2P token trading, welcome messages and role commands |
+| 2025-06-19 | Lê Văn Trung Tính (`tms-tinhle`) | Removed the casino, lixi, poll and trading features and added the DevHelp domain: `Command`, `Bug` and `Solution` entities and services, the `command`, `bug`, `solution` and `search` commands, and button-click handlers |
+| 2025-06-20 | Huu Thien (git author `NguyenHuuThien098`) | Mezon connection and clan-ID fixes, `/health` endpoint, bot state service, `bot`, `active`, `deactivate`, `botstatus` and `ping` commands |
+| 2025-06-20 | Lê Văn Trung Tính (`tms-tinhle`) | Command list added to this README |
 
-```bash
-$ yarn install
-```
+Development then moved to `Devhelp-mezon`, which starts from a single import of this code and continues with further fixes, an argument parser and UI updates.
 
-## Compile and run the project
+## What the code does at this snapshot
 
-```bash
-# development
-$ yarn run start
+A NestJS application that logs in to Mezon with a bot token and answers prefixed chat commands (`*`, `/` or `\`):
 
-# watch mode
-$ yarn run start:dev
+| Command | Purpose |
+| --- | --- |
+| `*help` | Command overview |
+| `*command save\|list\|detail\|find\|update\|delete\|restore` | Manage saved shell-command snippets (soft delete and restore) |
+| `*bug create\|list\|detail\|update` | Log bugs with severity and status |
+| `*solution create\|list\|detail\|update` | Solutions linked to a bug |
+| `*search [commands\|bugs\|solutions] <keyword>` | Case-insensitive substring search |
+| `*bot status\|on\|off\|reset`, `*active`, `*deactivate`, `*botstatus`, `*ping` | Bot on/off state and status |
 
-# production mode
-$ yarn run start:prod
-```
+Data is stored in PostgreSQL through TypeORM. See the `Devhelp-mezon` README for the full command reference, architecture and data model.
 
-## Run tests
+## Tech stack
+
+| Layer | Technology |
+| --- | --- |
+| Runtime | Node.js 18 |
+| Framework | NestJS 10, `@nestjs/event-emitter`, `@nestjs/config` + Joi |
+| Chat platform | `mezon-sdk` 2.7.99 |
+| Persistence | PostgreSQL via TypeORM 0.3 |
+| Package manager | Yarn 1 (`yarn.lock`) |
+
+## Getting started
 
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+yarn install
+yarn start:dev
 ```
 
-## Deployment
+A `.env` file in the project root must define the following (placeholders only):
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+| Name | Required | Description |
+| --- | --- | --- |
+| `POSTGRES_HOST` | yes | PostgreSQL host |
+| `POSTGRES_PORT` | yes | PostgreSQL port |
+| `POSTGRES_USER` | yes | Database user |
+| `POSTGRES_PASSWORD` | yes | Database password |
+| `POSTGRES_DB` | yes | Database name |
+| `MEZON_TOKEN` | yes | Mezon bot token |
+| `PORT` | no | HTTP port, defaults to `4000` |
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Notes
 
-```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
-```
+- Neither this repository nor the upstream template includes a license file; `package.json` marks the package as `UNLICENSED`.
+- Constants and dependencies from the template that DevHelp does not use (for example `src/bot/constants/tables.ts`, `better-sqlite3`, `qrcode`) are still present.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Author
 
-## Resources
+Contributor: **Lê Văn Trung Tính** — Software Engineer | AI Product Builder
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-
-
-command:
-1. Lệnh trợ giúp (help)
-*help
-2. Quản lý lệnh (command)
-*command save --title="git-stash" --command="git stash apply" --desc="Áp dụng stash gần nhất" --category="git"
-*command list --category="git"
-*command detail --id=1
-*command find --query="git stash"
-*command update --id=1 --title="git-stash-new" --desc="Mô tả mới"
-*command delete --id=1
-*command restore --id=1
-3. Quản lý bug
-*bug create --title="JWT token không refresh" --desc="Token mới không được tạo khi token cũ hết hạn" --severity="high" --steps="1. Đăng nhập\n2. Đợi token hết hạn\n3. Thực hiện API call" --environment={"os": "Ubuntu 22.04", "browser": "Chrome 118"}
-*bug list --status="open"
-*bug detail --id=1
-*bug update --id=1 --status="in_progress" --severity="medium" --title="JWT lỗi" --desc="Mô tả mới"
-4. Quản lý giải pháp (solution)
-*solution create --bug-id=1 --title="Sửa lỗi refresh token" --desc="Token refresh không hoạt động do thiếu kiểm tra" --code="const checkToken = async (req, res, next) => {...}"
-*solution list --bug-id=1
-*solution detail --id=1
-*solution update --id=1 --title="Tiêu đề mới" --desc="Mô tả mới" --code="Code mới"
-5. Tìm kiếm (search)
-*search token
-*search bugs refresh
-*search solutions authentication
-6. Kiểm tra trạng thái bot
-*bot status
-*bot deactivate
-*bot activate
-*bot reset
-7. Ping bot
-*ping# Devhelp-mezon
+- Website: [trungtinh.site](https://trungtinh.site)
+- GitHub: [@tinhne](https://github.com/tinhne)
